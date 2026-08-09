@@ -1,0 +1,23 @@
+.foo {
+  width: someVeryLongFunctionNameForJustAPow(2, someVeryLongFunctionNameForJustAPow(2, someVeryLongFunctionNameForJustAPow(2,
+  // THIS
+  someVeryLongFunctionNameForJustAPow(2, someVeryLongFunctionNameForJustAPow(2, someVeryLongFunctionNameForJustAPow(2, 2))))));
+}
+
+// The function after the comment stays aligned with the other arguments even
+// when it is not the last one.
+.bar {
+  width: someVeryLongFunctionNameForJustAPow(
+    2,
+    // THIS
+    someVeryLongFunctionNameForJustAPow(2, someVeryLongFunctionNameForJustAPow(2, 2)),
+    3
+  );
+}
+
+// A comment that is the last item in the group is printed as a line suffix, and
+// must not indent the value that precedes it either.
+.baz {
+  width: someVeryLongFunctionNameForJustAPow(someVeryLongFunctionNameForJustAPow(2, someVeryLongFunctionNameForJustAPow(2, 2)) // THIS
+  );
+}

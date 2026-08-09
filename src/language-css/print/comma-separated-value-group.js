@@ -73,6 +73,16 @@ function printCommaSeparatedValueGroup(path, options, print) {
     isInlineValueCommentNode(node),
   );
 
+  // A value like `f(a, // c\n b)` puts the comment and its neighbour into a
+  // `value-comma_group` that would not exist without the comment: dropping the
+  // comments leaves a single value, which the enclosing `value-paren_group`
+  // already indents. Indenting again would push that value — and the body and
+  // closing parenthesis of a nested function — one level too far.
+  const isCommentOnlyGroup =
+    hasInlineComment &&
+    parentNode.type === "value-paren_group" &&
+    node.groups.filter((node) => !isInlineValueCommentNode(node)).length <= 1;
+
   const printed = path.map(print, "groups");
   /*
    * We assume parts always meet following conditions:
@@ -412,7 +422,9 @@ function printCommaSeparatedValueGroup(path, options, print) {
     // Add `hardline` after inline comment (i.e. `// comment\n foo: bar;`)
     if (isInlineValueCommentNode(iNode)) {
       if (parentNode.type === "value-paren_group") {
-        parts.push(dedent(hardline), "");
+        // When the enclosing `indent` is skipped (see `isCommentOnlyGroup`) the
+        // hardline needs no `dedent` to line up with its siblings.
+        parts.push(isCommentOnlyGroup ? hardline : dedent(hardline), "");
         continue;
       }
       parts.push(hardline, "");
@@ -565,6 +577,10 @@ function printCommaSeparatedValueGroup(path, options, print) {
   // when type is value-comma_group
   // example @import url("verylongurl") projection,tv
   if (insideURLFunctionInImportAtRuleNode(path)) {
+    return group(fill(parts));
+  }
+
+  if (isCommentOnlyGroup) {
     return group(fill(parts));
   }
 
